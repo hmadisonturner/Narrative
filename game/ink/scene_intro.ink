@@ -8,7 +8,7 @@ EXTERNAL show_image(path)
 
 === introduction ===
 
-{show_image("cover.png")}
+{show_image("./assets/cover.png")}
 
 You awaken to the soft shimmer of simulated sunlight filtering through marble latticework. The hum of quantum scrolls echoes faintly from the archive walls. This is the **Academia Programmandi**, heart of the Digital Imperium.
 

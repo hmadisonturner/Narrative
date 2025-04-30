@@ -1,5 +1,5 @@
 // Load the Ink story
-fetch("scene_intro.ink.json")
+fetch("game.ink.js")
   .then((response) => response.text())
   .then((storyContent) => {
     const imageDiv = document.getElementById("image");

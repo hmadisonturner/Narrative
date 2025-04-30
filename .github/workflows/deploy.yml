@@ -1,0 +1,49 @@
+name: Build and Deploy to Dedicated Branch
+
+on:
+  push:
+    branches:
+      - main # Or your main development branch
+
+jobs:
+  build-and-deploy:
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to get an OIDC token
+    runs-on: ubuntu-latest
+    environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout Main Branch
+        uses: actions/checkout@v4
+
+      # Build step (replace with your build commands)
+      - name: Build Website
+        run: |
+          # Your build commands here (e.g., npm run build)
+          mkdir build && cp -r ./game/* build/ && cat ./engine/*.js > ./build/engine.js && cat ./engine/*.css > ./build/engine.css
+
+      - name: Checkout Dedicated Branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages # Replace with your dedicated branch name
+
+      - name: Copy Build Output to Dedicated Branch
+        run: |
+          cp -r './build/*' . # Replace with your actual path
+
+      - name: Commit and Push to Dedicated Branch
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update build output"
+          git push
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+        with:
+            branch: gh-pages # Replace with your dedicated branch name
+
