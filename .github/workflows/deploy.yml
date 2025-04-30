@@ -27,6 +27,12 @@ jobs:
             echo "Warning: engine directory not found"
             touch ./build/engine.js ./build/engine.css
           fi
+      - name: Upload
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "build/" 
+
 
   deploy:
     runs-on: ubuntu-latest
@@ -38,13 +44,7 @@ jobs:
         url: ${{ steps.deployment.outputs.page_url }}
     needs: build
     steps:
-      - name: Upload
-        id: deployment
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: "build/" 
-
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v3
+        uses: actions/deploy-pages@v4
 
