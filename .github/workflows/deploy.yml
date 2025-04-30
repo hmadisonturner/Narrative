@@ -22,6 +22,8 @@ jobs:
       - name: Build Website
         run: |
           mkdir ./build && cp -r ./game/* build/ && cat ./engine/*.js > ./build/engine.js && cat ./engine/*.css > ./build/engine.css
+
+      - name: Upload
         uses: actions/upload-pages-artifact@v4
         with:
           path: './build/' # Replace with the actual path to your built site
