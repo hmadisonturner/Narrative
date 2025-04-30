@@ -23,26 +23,12 @@ jobs:
         run: |
           mkdir ./build && cp -r ./game/* build/ && cat ./engine/*.js > ./build/engine.js && cat ./engine/*.css > ./build/engine.css
 
-      - name: Checkout Dedicated Branch
-        uses: actions/checkout@v4
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          ref: gh-pages # Replace with your dedicated branch name
-
-      - name: Copy Build Output to Dedicated Branch
-        run: |
-          cp -r './build/*' . # Replace with your actual path
-
-      - name: Commit and Push to Dedicated Branch
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add .
-          git commit -m "Update build output"
-          git push
+          path: './build' # Replace with the actual path to your built site
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
-        with:
-            branch: gh-pages # Replace with your dedicated branch name
 
