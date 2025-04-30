@@ -3,17 +3,11 @@ name: Build and Deploy to Dedicated Branch
 on:
   push:
     branches:
-      - main # Or your main development branch
+      - main 
 
 jobs:
-  build-and-deploy:
-    permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to get an OIDC token
+  build:
     runs-on: ubuntu-latest
-    environment:
-        name: github-pages
-        url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout Main Branch
         uses: actions/checkout@v3
@@ -34,10 +28,19 @@ jobs:
             touch ./build/engine.js ./build/engine.css
           fi
 
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to get an OIDC token
+    environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Upload
         uses: actions/upload-pages-artifact@v4
         with:
-          path: build/ # Replace with the actual path to your built site
+          path: "build/" 
 
       - name: Deploy to GitHub Pages
         id: deployment
