@@ -21,7 +21,7 @@ jobs:
       # Build step (replace with your build commands)
       - name: Build Website
         run: |
-          mkdir build && cp -r ./game/* build/ && cat ./engine/*.js > ./build/engine.js && cat ./engine/*.css > ./build/engine.css
+          mkdir ./build && cp -r ./game/* build/ && cat ./engine/*.js > ./build/engine.js && cat ./engine/*.css > ./build/engine.css
 
       - name: Checkout Dedicated Branch
         uses: actions/checkout@v4
