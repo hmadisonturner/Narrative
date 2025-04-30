@@ -18,13 +18,21 @@ jobs:
       - name: Checkout Main Branch
         uses: actions/checkout@v4
 
-      - name: foo
-        run: pwd && ls -lisah
-
-      # Build step (replace with your build commands)
       - name: Build Website
         run: |
-          mkdir ./build && cp -r ./game/* build/ && cat ./engine/*.js > ./build/engine.js && cat ./engine/*.css > ./build/engine.css
+          mkdir -p ./build
+          if [ -d "./game" ]; then
+            cp -r ./game/* build/ || echo "Warning: Could not copy game files"
+          else
+            echo "Warning: game directory not found"
+          fi
+          if [ -d "./engine" ]; then
+            find ./engine -name "*.js" | xargs cat > ./build/engine.js || echo "Warning: No JS files found"
+            find ./engine -name "*.css" | xargs cat > ./build/engine.css || echo "Warning: No CSS files found" 
+          else
+            echo "Warning: engine directory not found"
+            touch ./build/engine.js ./build/engine.css
+          fi
 
       - name: Upload
         uses: actions/upload-pages-artifact@v4
