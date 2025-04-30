@@ -1,0 +1,61 @@
+div#game {
+  max-width: 9in;
+  margin-left: auto;
+  margin-right: auto;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1em;
+}
+div#image img {
+  max-width: 100%;
+  border-radius: 5px;
+}
+div#main,
+div#image {
+  z-index: 9999;
+  background: reset;
+}
+div#background {
+  z-index: 10;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-image: url("./assets/cover.png");
+  background-position: center;
+  background-size: cover;
+  filter: blur(50%);
+  opacity: 0.3;
+}
+div#main {
+  background-color: white;
+  padding: 1em;
+  border-radius: 5px;
+  height: 90vh;
+  overflow: scroll;
+}
+div#story,
+div#choices {
+  font-family: "EB Garamond", serif;
+}
+div#story {
+  border-radius: 5px;
+  padding: 5em 2em 1em;
+}
+div#choices {
+  padding: 0 2em;
+  text-align: center;
+}
+div#choices div {
+  color: maroon;
+  border: 1px solid maroon;
+  border-radius: 5px;
+  margin-bottom: 1ex;
+}
+div#choices div:hover {
+  cursor: pointer;
+  color: red;
+  border-color: red;
+}
