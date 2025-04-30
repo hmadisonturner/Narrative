@@ -18,6 +18,9 @@ jobs:
       - name: Checkout Main Branch
         uses: actions/checkout@v4
 
+      - name: foo
+        run: pwd && ls -lisah
+
       # Build step (replace with your build commands)
       - name: Build Website
         run: |
