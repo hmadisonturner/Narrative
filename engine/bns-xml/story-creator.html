@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branching Narrative Author</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Branching Narrative Creator</h1>
+    </header>
+
+    <div class="container">
+        <!-- Left Panel - Input Section -->
+        <div class="input-panel">
+            <div class="xml-editor-container">
+                <h2>Story Editor</h2>
+                <label for="xml-input">Write or paste your Story XML here:</label>
+                <textarea id="xml-input">
+<story start_scene="intro">
+
+  <scene id="intro">
+    <text>
+      You stand at the entrance of a dark, echoing cave. A chill wind blows out from the darkness. To your right, a narrow path leads up the cliff face.
+    </text>
+    <choices>
+      <choice target="cave_depths">Enter the cave.</choice>
+      <choice target="cliff_path">Take the cliff path.</choice>
+      <choice target="run_away">Decide it's too scary and leave.</choice>
+    </choices>
+  </scene>
+
+  <scene id="cave_depths">
+    <text>
+      Inside, it's damp and smells of earth. Water drips steadily. You can barely see. You hear a faint scraping sound deeper within.
+    </text>
+    <choices>
+      <choice target="investigate_sound">Move towards the sound.</choice>
+      <choice target="cave_exit">Turn back and exit the cave.</choice>
+    </choices>
+  </scene>
+
+  <scene id="cliff_path">
+    <text>
+      The path is steep and crumbly. One wrong step could send you tumbling down. You see a bird's nest lodged in a crevice above.
+    </text>
+    <choices>
+      <choice target="climb_further">Keep climbing carefully.</choice>
+      <choice target="examine_nest">Try to reach the nest.</choice>
+      <choice target="return_intro">Climb back down.</choice>
+    </choices>
+  </scene>
+
+  <scene id="run_away">
+     <text>You decide discretion is the better part of valor and quickly walk away. Your adventure ends before it truly began.</text>
+     </scene>
+
+   <scene id="investigate_sound">
+     <text>You stumble forward and trip over a loose rock, making a loud clatter. The scraping stops, replaced by a low growl from the darkness ahead. Probably should have left...</text>
+     <choices>
+        <choice target="face_beast">Face whatever is there.</choice>
+        <choice target="cave_exit_panic">Panic and scramble back to the exit.</choice>
+     </choices>
+   </scene>
+
+   <scene id="cave_exit">
+     <text>You retreat back into the sunlight, relieved to be out of the oppressive darkness.</text>
+     <choices>
+        <choice target="cliff_path">Maybe the cliff path is better?</choice>
+        <choice target="run_away">Enough adventure for today.</choice>
+     </choices>
+   </scene>
+
+    <scene id="cave_exit_panic">
+     <text>In your panic, you slip again and hit your head. Everything goes dark. A poor ending.</text>
+     </scene>
+
+   <scene id="face_beast">
+        <text>You draw yourself up, ready to face the danger... only to find a large, grumpy badger digging for roots. It snorts at you and goes back to digging. Anticlimactic.</text>
+        <choices>
+            <choice target="cave_exit">Leave the badger in peace.</choice>
+        </choices>
+   </scene>
+
+  <scene id="climb_further">
+    <text>You reach the top of the cliff. The view is spectacular! You see a distant tower shimmering in the sun.</text>
+    </scene>
+
+   <scene id="examine_nest">
+    <text>You reach for the nest, but the mother bird returns and pecks fiercely at your hand! You recoil, losing your balance.</text>
+     <choices>
+        <choice target="fall_cliff">You tumble down the cliff!</choice>
+     </choices>
+   </scene>
+
+    <scene id="fall_cliff">
+    <text>You land hard at the bottom, thankfully only bruised and shaken. Maybe caves ARE safer?</text>
+     <choices>
+        <choice target="intro">Look at the cave entrance again.</choice>
+     </choices>
+   </scene>
+
+    <scene id="return_intro">
+    <text>You carefully climb back down to the starting point.</text>
+     <choices>
+        <choice target="intro">Reconsider your options.</choice>
+     </choices>
+   </scene>
+
+</story>
+                </textarea>
+                <div class="controls">
+                    <button id="start-button">Load and Play Story</button>
+                </div>
+                <div id="error-log" class="error"></div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Story Player -->
+        <div class="story-panel">
+            <div class="story-container">
+                <h2>Story Preview</h2>
+                <div id="story-text">Your story will appear here...</div>
+                <div id="story-choices">Make choices to continue the story...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class NarrativeEngine {
+            #scenes = new Map();
+            #startSceneId = null;
+            #currentSceneId = null;
+            #textElement = null;
+            #choicesElement = null;
+            #errorElement = null;
+
+            constructor(xmlString, textElementId, choicesElementId, errorElementId) {
+                this.#textElement = document.getElementById(textElementId);
+                this.#choicesElement = document.getElementById(choicesElementId);
+                this.#errorElement = document.getElementById(errorElementId);
+
+                if (!this.#textElement || !this.#choicesElement || !this.#errorElement) {
+                    throw new Error("One or more required HTML elements not found.");
+                }
+                this.#errorElement.textContent = ''; // Clear previous errors
+
+                try {
+                    this.#parseXml(xmlString);
+                } catch (e) {
+                    this.#logError(`Failed to parse XML: ${e.message}`);
+                    // Prevent further execution if parsing fails
+                    throw e; // Re-throw to signal failure to the caller
+                }
+            }
+
+            #logError(message) {
+                 console.error(message);
+                 if (this.#errorElement) {
+                     this.#errorElement.textContent = message;
+                 }
+            }
+
+            #parseXml(xmlString) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xmlString, "application/xml");
+
+                const parserError = doc.querySelector("parsererror");
+                if (parserError) {
+                    console.error("XML Parsing Error:", parserError);
+                    throw new Error(`XML Parsing Error: ${parserError.textContent.trim().split('\n')[0]}`);
+                }
+
+                const storyElement = doc.querySelector("story");
+                if (!storyElement) {
+                    throw new Error("No <story> element found in XML.");
+                }
+
+                this.#startSceneId = storyElement.getAttribute("start_scene");
+                if (!this.#startSceneId) {
+                    throw new Error("<story> element missing 'start_scene' attribute.");
+                }
+
+                this.#scenes.clear(); // Clear previous scenes if any
+                const sceneElements = doc.querySelectorAll("scene");
+                if (sceneElements.length === 0) {
+                     throw new Error("No <scene> elements found in the story.");
+                }
+
+                sceneElements.forEach(sceneEl => {
+                    const id = sceneEl.getAttribute("id");
+                    if (!id) {
+                        console.warn("Found <scene> element without an 'id' attribute. Skipping.");
+                        return; // Skip scenes without IDs
+                    }
+
+                    const textEl = sceneEl.querySelector("text");
+                    const text = textEl ? textEl.innerHTML.trim() : "This scene has no text."; // Allow basic HTML in text
+
+                    const choices = [];
+                    const choiceElements = sceneEl.querySelectorAll("choices > choice"); // Select direct children
+                    choiceElements.forEach(choiceEl => {
+                        const target = choiceEl.getAttribute("target");
+                        const choiceText = choiceEl.textContent.trim();
+                        if (!target) {
+                             console.warn(`Choice "${choiceText}" in scene "${id}" is missing a 'target' attribute. Skipping choice.`);
+                             return;
+                        }
+                        choices.push({ text: choiceText, target: target });
+                    });
+
+                    if (this.#scenes.has(id)) {
+                        console.warn(`Duplicate scene ID "${id}" found. Overwriting previous definition.`);
+                    }
+                    this.#scenes.set(id, { text: text, choices: choices });
+                });
+
+                // Final validation: Does the start scene exist?
+                if (!this.#scenes.has(this.#startSceneId)) {
+                     throw new Error(`The specified start_scene "${this.#startSceneId}" does not match any defined scene ID.`);
+                }
+
+                console.log(`Parsed ${this.#scenes.size} scenes. Start scene: ${this.#startSceneId}`);
+            }
+
+            start() {
+                if (!this.#startSceneId) {
+                    this.#logError("Cannot start story: Start scene ID is not set.");
+                    return;
+                }
+                if (!this.#scenes.has(this.#startSceneId)) {
+                    this.#logError(`Cannot start story: Start scene ID "${this.#startSceneId}" not found in parsed scenes.`);
+                    return;
+                }
+                this.#currentSceneId = this.#startSceneId;
+                this.#renderScene(this.#currentSceneId);
+            }
+
+            #renderScene(sceneId) {
+                const sceneData = this.#scenes.get(sceneId);
+
+                if (!sceneData) {
+                    this.#logError(`Error: Scene with ID "${sceneId}" not found.`);
+                    // Avoid clearing the display, show error instead
+                    this.#choicesElement.innerHTML = `<p class="error">Error: Story branch broken (target scene "${sceneId}" not found).</p>`;
+                    return;
+                }
+
+                // Use innerHTML to allow basic tags like <b>, <i>, <br> from the XML text
+                this.#textElement.innerHTML = sceneData.text;
+                this.#choicesElement.innerHTML = ''; // Clear old choices
+
+                if (sceneData.choices && sceneData.choices.length > 0) {
+                    sceneData.choices.forEach(choice => {
+                        const button = document.createElement('button');
+                        button.textContent = choice.text;
+                        // Use arrow function to maintain 'this' context when calling handleChoice
+                        button.addEventListener('click', () => this.#handleChoice(choice.target));
+                        this.#choicesElement.appendChild(button);
+                    });
+                } else {
+                    const endMessage = document.createElement('p');
+                    endMessage.textContent = "--- The End ---";
+                    endMessage.className = "end-message";
+                    this.#choicesElement.appendChild(endMessage);
+                }
+                this.#currentSceneId = sceneId; // Update current scene tracker
+            }
+
+            #handleChoice(targetSceneId) {
+                console.log(`Choice selected. Moving to scene: ${targetSceneId}`);
+                 // Check existence *before* rendering
+                if (!this.#scenes.has(targetSceneId)) {
+                   this.#logError(`Error: Target scene ID "${targetSceneId}" does not exist.`);
+                   this.#choicesElement.innerHTML = `<p class="error">Error: Story branch broken (target scene "${targetSceneId}" not found).</p>`;
+                } else {
+                   this.#renderScene(targetSceneId);
+                }
+            }
+        }
+
+        // --- Event Listener for the Start Button ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const startButton = document.getElementById('start-button');
+            const xmlInput = document.getElementById('xml-input');
+            let narrativeEngine = null; // Hold the engine instance
+
+            startButton.addEventListener('click', () => {
+                const xmlData = xmlInput.value;
+                if (!xmlData.trim()) {
+                     document.getElementById('error-log').textContent = 'XML input cannot be empty.';
+                     return;
+                }
+                try {
+                    // Create a new engine instance each time start is clicked
+                     narrativeEngine = new NarrativeEngine(xmlData, 'story-text', 'story-choices', 'error-log');
+                     narrativeEngine.start();
+                } catch (error) {
+                     console.error("Failed to initialize or start narrative engine:", error);
+                     // Error is already logged by the constructor or start method via #logError
+                }
+            });
+        });
+    </script>
+</body>
+</html>
