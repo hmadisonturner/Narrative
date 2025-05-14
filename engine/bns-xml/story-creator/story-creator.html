@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Branching Narrative</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        #story-text { margin-bottom: 20px; padding: 15px; background-color: #f4f4f4; border-radius: 5px; min-height: 50px; }
-        #story-choices button { display: block; margin: 10px 0; padding: 10px 15px; cursor: pointer; }
-        #xml-input { width: 90%; height: 150px; margin-bottom: 10px; }
-        .error { color: red; font-weight: bold; }
-    </style>
+    <title>Branching Narrative Author</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <header>
+        <h1>Branching Narrative Creator</h1>
+    </header>
 
-    <h1>Branching Narrative Player</h1>
-
-    <label for="xml-input">Paste your Story XML here:</label><br>
-    <textarea id="xml-input">
+    <div class="container">
+        <!-- Left Panel - Input Section -->
+        <div class="input-panel">
+            <div class="xml-editor-container">
+                <h2>Story Editor</h2>
+                <label for="xml-input">Write or paste your Story XML here:</label>
+                <textarea id="xml-input">
 <story start_scene="intro">
 
   <scene id="intro">
@@ -109,14 +109,30 @@
    </scene>
 
 </story>
-    </textarea><br>
-    <button id="start-button">Load and Start Story</button>
+                </textarea>
+                <div class="file-upload">
+                    <label for="file-input">Or upload a story file:</label>
+                    <div class="file-input-container">
+                        <input type="file" id="file-input" accept=".story,.xml,.txt" />
+                        <button id="upload-button">Upload Story</button>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button id="start-button">Load and Play Story</button>
+                </div>
+                <div id="error-log" class="error"></div>
+            </div>
+        </div>
 
-    <hr>
-
-    <div id="story-text">Story text will appear here...</div>
-    <div id="story-choices">Choices will appear here...</div>
-    <div id="error-log" class="error"></div>
+        <!-- Right Panel - Story Player -->
+        <div class="story-panel">
+            <div class="story-container">
+                <h2>Story Preview</h2>
+                <div id="story-text">Your story will appear here...</div>
+                <div id="story-choices">Make choices to continue the story...</div>
+            </div>
+        </div>
+    </div>
 
     <script>
         class NarrativeEngine {
@@ -253,6 +269,7 @@
                 } else {
                     const endMessage = document.createElement('p');
                     endMessage.textContent = "--- The End ---";
+                    endMessage.className = "end-message";
                     this.#choicesElement.appendChild(endMessage);
                 }
                 this.#currentSceneId = sceneId; // Update current scene tracker
@@ -270,35 +287,73 @@
             }
         }
 
-        // --- Event Listener for the Start Button ---
-        const startButton = document.getElementById('start-button');
-        const xmlInput = document.getElementById('xml-input');
-        let narrativeEngine = null; // Hold the engine instance
+        // --- Event Listeners for the Start Button and File Upload ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const startButton = document.getElementById('start-button');
+            const xmlInput = document.getElementById('xml-input');
+            const fileInput = document.getElementById('file-input');
+            const uploadButton = document.getElementById('upload-button');
+            const errorLog = document.getElementById('error-log');
+            let narrativeEngine = null; // Hold the engine instance
 
-        startButton.addEventListener('click', () => {
-            const xmlData = xmlInput.value;
-            if (!xmlData.trim()) {
-                 document.getElementById('error-log').textContent = 'XML input cannot be empty.';
-                 return;
-            }
-            try {
-                // Create a new engine instance each time start is clicked
-                 narrativeEngine = new NarrativeEngine(xmlData, 'story-text', 'story-choices', 'error-log');
-                 narrativeEngine.start();
-            } catch (error) {
-                 console.error("Failed to initialize or start narrative engine:", error);
-                 // Error is already logged by the constructor or start method via #logError
-            }
+            // Function to load and start the narrative engine
+            const loadAndStartEngine = (xmlData) => {
+                if (!xmlData.trim()) {
+                    errorLog.textContent = 'XML input cannot be empty.';
+                    return;
+                }
+                try {
+                    // Create a new engine instance each time start is clicked
+                    narrativeEngine = new NarrativeEngine(xmlData, 'story-text', 'story-choices', 'error-log');
+                    narrativeEngine.start();
+                } catch (error) {
+                    console.error("Failed to initialize or start narrative engine:", error);
+                    // Error is already logged by the constructor or start method via #logError
+                }
+            };
+
+            // Start button click handler
+            startButton.addEventListener('click', () => {
+                loadAndStartEngine(xmlInput.value);
+            });
+
+            // File upload handler
+            uploadButton.addEventListener('click', () => {
+                if (!fileInput.files.length) {
+                    errorLog.textContent = 'Please select a file to upload.';
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = (event) => {
+                    try {
+                        const fileContent = event.target.result;
+                        xmlInput.value = fileContent; // Put the file content into the textarea
+                        loadAndStartEngine(fileContent);
+                        errorLog.textContent = `File "${file.name}" loaded successfully!`;
+                    } catch (error) {
+                        errorLog.textContent = `Error reading file: ${error.message}`;
+                        console.error("Error reading file:", error);
+                    }
+                };
+                
+                reader.onerror = () => {
+                    errorLog.textContent = 'Error reading the file.';
+                    console.error("File reading error");
+                };
+                
+                reader.readAsText(file);
+            });
+
+            // Also allow selecting a file to immediately trigger the upload button
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    uploadButton.click();
+                }
+            });
         });
-
-        // Optional: Auto-start if XML is pre-filled (e.g., for testing)
-        // document.addEventListener('DOMContentLoaded', () => {
-        //     if (xmlInput.value.trim()) {
-        //         startButton.click();
-        //     }
-        // });
-
     </script>
-
 </body>
 </html>

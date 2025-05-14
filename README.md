@@ -17,14 +17,15 @@ This project combines the [Ink scripting language](https://www.inklestudios.com/
 1. Clone this repository
 2. Install dependencies with `npm install`
 3. Open `game/index.html` in your browser to play Ink-based games
-4. Open `engine/bns-xml/demo.html` in your browser to try the BNS-XML player
+4. Open `engine/bns-xml/story-creator.html` in your browser to create and test BNS-XML stories
+   - [Try the Story Creator online](https://hmadisonturner.github.io/Narrative/bns-xml/story-creator.html)
 
 ## Project Structure
 - `engine/` - Core engine files for rendering and processing
   - `bns-xml/` - BNS-XML implementation and documentation
     - `BNS-XML.md` - Documentation for the BNS-XML format
-    - `demo.html` - Interactive player for BNS-XML stories
-    - `jeeves-wooster-adventure.story` - Example BNS-XML story
+    - `story-creator.html` - Interactive editor and player for creating BNS-XML stories ([Try it online](https://hmadisonturner.github.io/Narrative/bns-xml/story-creator.html))
+    - `examples/jeeves-wooster-adventure.story` - Example BNS-XML story
 - `game/` - Game content including Ink scripts and assets
   - `ink/` - Story files written in Ink format
   - `assets/` - Images and other media
