@@ -27,6 +27,12 @@ jobs:
             echo "Warning: engine directory not found"
             touch ./build/engine.js ./build/engine.css
           fi
+          if [ -d "./engine/bns-xml" ]; then
+            mkdir ./build/bns-xml
+            cp ./engine/bns-xml/story-creator/* ./build/bns-xml || echo "Warning: BNS-XML demo not found"
+          else
+            echo "Warning: bns-xml directory not found"
+          fi
       - name: Upload
         id: deployment
         uses: actions/upload-pages-artifact@v3
